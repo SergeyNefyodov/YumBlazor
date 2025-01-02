@@ -4,7 +4,7 @@ namespace YumBlazor.Repository.IRepository;
 
 public interface ICategoryRepository
 {
-    Category Create();
+    Category Create(Category category);
     Category Update(Category category);
     bool Delete(int id);
     Category Get(int id);
