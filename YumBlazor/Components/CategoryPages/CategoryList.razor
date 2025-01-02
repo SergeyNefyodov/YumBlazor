@@ -26,4 +26,17 @@ else
 
 @code {
     private bool _isProcessing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isProcessing = true;
+        await Task.Delay(2000);
+        LoadCategories();
+        _isProcessing = false;
+    }
+
+    private void LoadCategories()
+    {
+    }
+
 }
