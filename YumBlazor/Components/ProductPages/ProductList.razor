@@ -1,0 +1,119 @@
+@page "/product"
+@inject IProductRepository ProductRepository
+@inject IJSRuntime JsRuntime
+
+<BsModal
+    Title="Are you sure you want to delete this Product?"
+    ButtonStyle="btn-danger"
+    ButtonText="Delete"
+    OnConfirm="ConfirmDelete"
+    OnCancel="CancelDelete"/>
+@if (_isProcessing)
+{
+    <div class="position-absolute w-75 h-75 d-flex flex-column align-items-center bg-white justify-content-center">
+        <img src="images/loading.gif" alt="loading"/>
+    </div>
+}
+else
+{
+    <div class="card shadow border-0 mt-4">
+        <div class="card-header bg-black bg-gradient ml-0 py-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="text-white py-2"> Product List</h2>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="col-12 text-end">
+                <a href="product/create" class="btn btn-secondary btn-lg m-4" style="width: 250px">
+                    <i class="bi bi-plus-square"></i> Add New Product
+                </a>
+            </div>
+            @if (_products.Any())
+            {
+                <table class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var product in _products)
+                    {
+                        <tr>
+                            <td>
+                                @product.Name
+                            </td>
+                            <td>
+                                <a href=@($"product/update/{product.Id}") class="btn btn-primary">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <button class="btn btn-danger" @onclick="() => HandleDelete(product.Id)">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private bool _isProcessing = true;
+    private IEnumerable<Product> _products = new List<Product>();
+    private int _idToDelete;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadCategoriesAsync();
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        _products = await ProductRepository.GetAllAsync();
+    }
+
+    private async Task HandleDelete(int id)
+    {
+        _idToDelete = id;
+        await JsRuntime.ShowConfirmationModal();
+    }
+
+    private async Task ConfirmDelete()
+    {
+        _isProcessing = true;
+        if (_idToDelete > 0)
+        {
+            var result = await ProductRepository.DeleteAsync(_idToDelete);
+            if (result)
+            {
+                await JsRuntime.ToastrSuccess("Product deleted successfully");
+                await LoadCategoriesAsync();
+            }
+            else
+            {
+                await JsRuntime.ToastrError("Error encountered while deleted");
+            }
+        }
+
+        _idToDelete = 0;
+        _isProcessing = false;
+        await JsRuntime.HideConfirmationModal();
+    }
+
+    private async Task CancelDelete()
+    {
+        await JsRuntime.HideConfirmationModal();
+    }
+
+}

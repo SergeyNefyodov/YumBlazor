@@ -18,4 +18,8 @@
       <Folder Include="ViewModels\" />
     </ItemGroup>
 
+    <ItemGroup>
+        <AdditionalFiles Include="Components\ProductPages\ProductList.razor"/>
+    </ItemGroup>
+
 </Project>
