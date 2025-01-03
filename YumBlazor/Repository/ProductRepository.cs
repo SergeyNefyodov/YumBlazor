@@ -41,12 +41,14 @@ public class ProductRepository(ApplicationDbContext dbContext) : IProductReposit
 
     public async Task<Product> GetAsync(int id)
     {
-        var productFromDb = await dbContext.Products.FirstOrDefaultAsync(prod => prod.Id == id);
+        var productFromDb = await dbContext.Products
+            .Include(prod => prod.Category)
+            .FirstOrDefaultAsync(prod => prod.Id == id);
         return productFromDb ?? new Product();
     }
 
     public async Task<IEnumerable<Product>> GetAllAsync()
     {
-        return await dbContext.Products.ToListAsync();
+        return await dbContext.Products.Include(prod => prod.Category).ToListAsync();
     }
 }
