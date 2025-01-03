@@ -9,6 +9,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
 @inject SignInManager<ApplicationUser> SignInManager
+@inject RoleManager<IdentityRole> RoleManager
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
@@ -94,6 +95,23 @@
         }
 
         Logger.LogInformation("User created a new account with password.");
+
+        if (!await RoleManager.RoleExistsAsync(Input.Role.ToString()!))
+        {
+            foreach (var role in Enum.GetValues<UserRole>())
+            {
+                await RoleManager.CreateAsync(new IdentityRole(role.ToString()));
+            }
+        }
+
+        if (Input.Role is not null)
+        {
+            await UserManager.AddToRoleAsync(user, Input.Role.ToString()!);
+        }
+        else
+        {
+            await UserManager.AddToRoleAsync(user, UserRole.Customer.ToString()!);
+        }
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
