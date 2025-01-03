@@ -13,4 +13,9 @@ public static class JsRuntimeExtensions
     {
         await jsRuntime.InvokeVoidAsync("showToastr", "error", message);
     }
+
+    public static async Task ShowConfirmationModal(this IJSRuntime jsRuntime)
+    {
+        await jsRuntime.InvokeVoidAsync("ShowConfirmationModal");
+    }
 }
