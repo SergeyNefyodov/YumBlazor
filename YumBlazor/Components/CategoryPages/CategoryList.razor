@@ -2,7 +2,7 @@
 @inject ICategoryRepository CategoryRepository
 @inject IJSRuntime JsRuntime
 
-<BsModal/>
+<BsModal OnConfirm="ConfirmDelete" OnCancel="CancelDelete"/>
 @if (_isProcessing)
 {
     <div class="position-absolute w-75 h-75 d-flex flex-column align-items-center bg-white justify-content-center">
@@ -103,6 +103,11 @@ else
 
         _idToDelete = 0;
         _isProcessing = false;
+        await JsRuntime.HideConfirmationModal();
     }
 
+    private async Task CancelDelete()
+    {
+        await JsRuntime.HideConfirmationModal();
+    }
 }

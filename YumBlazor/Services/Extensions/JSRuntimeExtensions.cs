@@ -16,6 +16,11 @@ public static class JsRuntimeExtensions
 
     public static async Task ShowConfirmationModal(this IJSRuntime jsRuntime)
     {
-        await jsRuntime.InvokeVoidAsync("ShowConfirmationModal");
+        await jsRuntime.InvokeVoidAsync("showConfirmationModal");
+    }
+
+    public static async Task HideConfirmationModal(this IJSRuntime jsRuntime)
+    {
+        await jsRuntime.InvokeVoidAsync("hideConfirmationModal");
     }
 }
