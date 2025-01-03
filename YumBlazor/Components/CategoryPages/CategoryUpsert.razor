@@ -3,6 +3,7 @@
 
 @inject ICategoryRepository CategoryRepository
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
 
 @if (IsProcessing)
 {
@@ -77,10 +78,12 @@ else
         if (Id == 0)
         {
             await CategoryRepository.CreateAsync(Category);
+            await JsRuntime.ToastrSuccess($"Category {Category.Name} created successfully");
         }
         else
         {
             await CategoryRepository.UpdateAsync(Category);
+            await JsRuntime.ToastrSuccess($"Category {Category.Name} updated successfully");
         }
 
         IsProcessing = false;
