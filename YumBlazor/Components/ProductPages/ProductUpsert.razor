@@ -5,6 +5,7 @@
 @inject ICategoryRepository CategoryRepository
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
+@inject IWebHostEnvironment Environment
 
 @if (IsProcessing)
 {
@@ -53,7 +54,7 @@ else
                         <ValidationMessage For="@(() => Product.CategoryId)"></ValidationMessage>
                     </div>
                     <div class="form-floating py-3 col-12">
-                        <InputFile OnChange="LoadFile" class="form-control" id="customFile"/>
+                        <InputFile accept="image/x-png,image/jpeg" OnChange="LoadFileAsync" class="form-control" id="customFile"/>
                         <label for="customFile">Upload Image</label>
                     </div>
                     <div class="row mt-3">
@@ -76,13 +77,17 @@ else
 
 @code {
     private bool IsProcessing { get; set; } = true;
-    private bool _isImageLoading;
     private string? _imageDirectoryPath;
     private IEnumerable<Category> _categories;
 
     [SupplyParameterFromForm] private Product Product { get; set; } = new();
 
     [Parameter] public int Id { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _imageDirectoryPath = Path.Combine(Environment.WebRootPath, "images", "product");
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -120,8 +125,22 @@ else
         NavigationManager.NavigateTo("product");
     }
 
-    private void LoadFile(InputFileChangeEventArgs args)
+    private async Task LoadFileAsync(InputFileChangeEventArgs args)
     {
+        IsProcessing = true;
+        var file = args.File;
+        var fileInfo = new FileInfo(file.Name);
+        var newName = $"{Guid.NewGuid()}.{fileInfo.Extension}";
+        if (!Directory.Exists(_imageDirectoryPath))
+        {
+            Directory.CreateDirectory(_imageDirectoryPath!);
+        }
+
+        var path = Path.Combine(_imageDirectoryPath!, newName);
+
+        await using var fileStream = new FileStream(path, FileMode.Create);
+        await file.OpenReadStream(file.Size).CopyToAsync(fileStream);
+        IsProcessing = false;
     }
 
 }
