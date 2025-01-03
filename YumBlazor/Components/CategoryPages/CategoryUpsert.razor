@@ -2,8 +2,9 @@
 @page "/category/create"
 
 @inject ICategoryRepository CategoryRepository
+@inject NavigationManager NavigationManager
 
-@if (_isProcessing)
+@if (IsProcessing)
 {
     <div class="position-absolute w-75 h-75 d-flex flex-column align-items-center bg-white justify-content-center">
         <img src="images/loading.gif" alt="loading"/>
@@ -20,19 +21,37 @@ else
             </div>
         </div>
         <div class="card-body p-4">
-            <div class="col-12 text-end">
-                <a href="category/create" class="btn btn-secondary btn-lg m-4" style="width: 250px">
-                    <i class="bi bi-plus-square"></i>Add New Category
-                </a>
-            </div>
-
+            <EditForm Model="Category" FormName="CategoryUpsertForm" OnValidSubmit="UpsertForm">
+                <DataAnnotationsValidator/>
+                <div class="border p-3 mt-4">
+                    <div class="form-floating py-3 col-12">
+                        <InputText @bind-Value="Category.Name" class="form-control" id="Name"/>
+                        <label for="Name">Name</label>
+                        <ValidationMessage For="@(() => Category.Name)"></ValidationMessage>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-6 col-md-3">
+                            <button type="submit" class="btn btn-primary form-control" disabled="@IsProcessing">
+                                <i class="bi bi-floppy"></i> @(Id == 0 ? "Create" : "Update")
+                            </button>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="category" class="btn btn-secondary form-control" disabled="@IsProcessing">
+                                <i class="bi bi-arrow-bar-left"></i> Back to category
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
         </div>
     </div>
 }
 
 @code {
-    private bool _isProcessing = true;
-    [SupplyParameterFromForm] private Category Category { get; set; } = new Category();
+    private bool IsProcessing { get; set; } = true;
+
+    [SupplyParameterFromForm] private Category Category { get; set; } = new();
+
     [Parameter] public int Id { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -40,7 +59,7 @@ else
         if (firstRender)
         {
             await LoadCategoryAsync();
-            _isProcessing = false;
+            IsProcessing = false;
             StateHasChanged();
         }
     }
@@ -50,6 +69,22 @@ else
         if (Id == 0) return;
 
         Category = await CategoryRepository.GetAsync(Id);
+    }
+
+    private async Task UpsertForm(EditContext obj)
+    {
+        IsProcessing = true;
+        if (Id == 0)
+        {
+            await CategoryRepository.CreateAsync(Category);
+        }
+        else
+        {
+            await CategoryRepository.UpdateAsync(Category);
+        }
+
+        IsProcessing = false;
+        NavigationManager.NavigateTo("category");
     }
 
 }
