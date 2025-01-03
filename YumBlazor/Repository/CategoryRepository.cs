@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using YumBlazor.Data;
 using YumBlazor.Repository.IRepository;
 
@@ -5,44 +6,42 @@ namespace YumBlazor.Repository;
 
 public class CategoryRepository(ApplicationDbContext dbContext) : ICategoryRepository
 {
-    public Category Create(Category category)
+    public async Task<Category> CreateAsync(Category category)
     {
         dbContext.Categories.Add(category);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
         return category;
     }
 
-    public Category Update(Category category)
+    public async Task<Category> UpdateAsync(Category category)
     {
-        var categoryFromDb = dbContext.Categories.FirstOrDefault(cat => cat.Id == category.Id);
+        var categoryFromDb = await dbContext.Categories.FirstOrDefaultAsync(cat => cat.Id == category.Id);
 
         if (categoryFromDb is null) return new Category();
 
         categoryFromDb.Name = category.Name;
         dbContext.Categories.Update(categoryFromDb);
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
         return categoryFromDb;
     }
 
-    public bool Delete(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        var categoryFromDb = dbContext.Categories.FirstOrDefault(cat => cat.Id == id);
+        var categoryFromDb = await dbContext.Categories.FirstOrDefaultAsync(cat => cat.Id == id);
         if (categoryFromDb is null) return false;
 
         dbContext.Categories.Remove(categoryFromDb);
-        return dbContext.SaveChanges() > 0;
+        return await dbContext.SaveChangesAsync() > 0;
     }
 
-    public Category Get(int id)
+    public async Task<Category> GetAsync(int id)
     {
-        var categoryFromDb = dbContext.Categories.FirstOrDefault(cat => cat.Id == id);
-        if (categoryFromDb is null) return new Category();
-
-        return categoryFromDb;
+        var categoryFromDb = await dbContext.Categories.FirstOrDefaultAsync(cat => cat.Id == id);
+        return categoryFromDb ?? new Category();
     }
 
-    public IEnumerable<Category> GetAll()
+    public async Task<IEnumerable<Category>> GetAllAsync()
     {
-        return dbContext.Categories.ToList();
+        return await dbContext.Categories.ToListAsync();
     }
 }
