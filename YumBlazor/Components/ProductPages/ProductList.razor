@@ -85,13 +85,13 @@ else
     {
         if (firstRender)
         {
-            await LoadCategoriesAsync();
+            await LoadProductsAsync();
             _isProcessing = false;
             StateHasChanged();
         }
     }
 
-    private async Task LoadCategoriesAsync()
+    private async Task LoadProductsAsync()
     {
         _products = await ProductRepository.GetAllAsync();
     }
@@ -111,7 +111,7 @@ else
             if (result)
             {
                 await JsRuntime.ToastrSuccess("Product deleted successfully");
-                await LoadCategoriesAsync();
+                await LoadProductsAsync();
             }
             else
             {
