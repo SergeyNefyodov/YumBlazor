@@ -4,7 +4,7 @@ using YumBlazor.Repository.IRepository;
 
 namespace YumBlazor.Repository;
 
-public class ProductRepository(ApplicationDbContext dbContext) : IProductRepository
+public class ProductRepository(ApplicationDbContext dbContext, IWebHostEnvironment environment) : IProductRepository
 {
     public async Task<Product> CreateAsync(Product product)
     {
@@ -36,6 +36,15 @@ public class ProductRepository(ApplicationDbContext dbContext) : IProductReposit
         if (productFromDb is null) return false;
 
         dbContext.Products.Remove(productFromDb);
+        if (productFromDb.ImageUrl is not null)
+        {
+            var path = Path.Combine(environment.WebRootPath, productFromDb.ImageUrl.TrimStart('/'));
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+
         return await dbContext.SaveChangesAsync() > 0;
     }
 
